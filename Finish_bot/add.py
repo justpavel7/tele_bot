@@ -60,6 +60,23 @@ def amount_handler(message: telebot.types.Message, quote, base):
 	else:
 		text = f'Цена {amount} {quote} в {base} : {total_base}'
 		bot.send_message(message.chat.id, text)
+@bot.message_handler(content_types=['text', ])
+def convert(message: telebot.types.Message):
+	try:
+		values = message.text.split(' ')
 
+		if len(values) != 3:
+			raise ConvertionExeption('Не верное количество параметров.')
+
+		quote, base, amount = values
+		total_base = CryptoConverter.convert(quote.lower(), base.lower(), amount)
+	except ConvertionExeption as e:
+		bot.reply_to(message, f'Ошибка пользователя.\n{e}')
+	except Exception as e:
+		bot.reply_to(message, f'Не удалось обработать команду\n{e}')
+	else:
+		
+		text = f'Цена {amount} {quote} в {base} - {float(total_base) * 1.0}'
+		bot.send_message(message.chat.id, text)
 
 bot.polling()
